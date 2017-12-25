@@ -1,5 +1,29 @@
 Vagrant.configure("2") do |config|
 
+   config.vm.define "caldera" do |cfg|
+      config.vm.box = "bento/ubuntu-16.04"
+      config.vm.hostname = "caldera"
+      config.vm.provision :shell, path: "bootstrap2.sh"
+      config.vm.network :private_network, ip: "192.168.38.66", dns: "8.8.8.8"
+      config.vm.network :forwarded_port, guest: 8888, host: 8888
+      config.ssh.username = "vagrant"
+      config.ssh.password = "vagrant"
+      config.ssh.insert_key = false
+      config.vm.provider "virtualbox" do |v|
+         v.memory = 8192
+         v.cpus = 2 
+         v.gui = false
+      end
+   cfg.vm.provider "virtualbox" do |vb, override|
+      vb.gui = true
+      vb.customize ["modifyvm", :id, "--memory", 8192]
+      vb.customize ["modifyvm", :id, "--cpus", 2]
+      vb.customize ["modifyvm", :id, "--vram", "32"]
+      vb.customize ["modifyvm", :id, "--clipboard", "bidirectional"]
+      vb.customize ["setextradata", "global", "GUI/SuppressMessages", "all" ]
+    end
+  end
+
   config.vm.define "logger" do |cfg|
     cfg.vm.box = "bento/ubuntu-16.04"
     cfg.vm.hostname = "logger"
@@ -7,7 +31,9 @@ Vagrant.configure("2") do |config|
     cfg.vm.network :private_network, ip: "192.168.38.5", gateway: "192.168.38.1", dns: "8.8.8.8"
     config.vm.network :forwarded_port, guest: 8000, host: 8000
     config.vm.network :forwarded_port, guest: 8412, host: 8412
-
+    config.ssh.username = "vagrant"
+    config.ssh.password = "vagrant"
+    config.ssh.insert_key = false
     cfg.vm.provider "vmware_fusion" do |v, override|
       v.memory = 2048
       v.cpus = 1
